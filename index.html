@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>داشبۆردی بەڕێوەبردنی سۆشیال میدیا</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts - Vazirmatn -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        dark: {
+                            bg: '#0b0f19',
+                            card: '#161e2e',
+                            border: '#26334d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-panel {
+            background: rgba(22, 30, 46, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-button:active {
+            transform: scale(0.96);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(11, 15, 25, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26334d;
+            border-radius: 4px;
+        }
+
+        /* Glowing Effects */
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+        }
+        .glow-indigo {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Pulse Animations */
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg min-h-screen pb-24 text-gray-100 selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Mobile Optimized -->
+    <header class="sticky top-0 z-40 glass-panel px-4 py-3 border-b border-gray-800/80">
+        <div class="flex items-center justify-between max-w-md mx-auto">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">
+                        <i class="fa-solid font-bold text-lg">R</i>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-dark-bg rounded-full animate-pulse"></span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-wide">ڕێکار كۆنتڕۆڵ</h1>
+                    <div class="flex items-center gap-1.5 text-xs text-gray-400">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse-fast"></span>
+                        <span id="system-status">سیستم کارایە</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="triggerNotification()" class="w-9 h-9 rounded-xl glass-button flex items-center justify-center text-gray-300 hover:text-white transition">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <button onclick="toggleModal('accountModal')" class="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white transition shadow-lg shadow-indigo-600/30">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Mobile Container -->
+    <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
+
+        <!-- Quick Controller Status Card -->
+        <div class="glass-panel p-4 rounded-3xl border border-indigo-500/20 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl"></div>
+            
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                    <i class="fa-solid fa-bolt ml-1"></i> دۆخی کارپێکردن
+                </span>
+                <span class="text-xs text-gray-400" id="live-timer">00:00:00</span>
+            </div>
+
+            <!-- TikTok Live URL Input Box Section -->
+            <div class="space-y-3 mb-4 bg-dark-bg/60 p-3 rounded-2xl border border-gray-800">
+                <label class="block text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                    <i class="fa-brands fa-tiktok text-pink-500 text-sm"></i>
+                    شوێنی دانانی لینکی لایڤ (TikTok Live URL)
+                </label>
+                <div class="relative">
+                    <input type="url" id="liveUrlInput" placeholder="https://www.tiktok.com/@username/live" 
+                           class="w-full pl-3 pr-14 py-2.5 rounded-xl bg-dark-card border border-gray-700 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 dir-ltr transition">
+                    <button onclick="pasteLiveUrl()" class="absolute left-2 top-1/2 -translate-y-1/2 text-xs bg-indigo-600/30 text-indigo-300 px-2 py-1 rounded-lg hover:bg-indigo-600/50 transition">
+                        Paste
+                    </button>
+                </div>
+
+                <!-- Speed / Rate Selection -->
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                    <button onclick="setSpeed(2000, this)" class="speed-btn active py-1.5 rounded-lg bg-indigo-600 text-white text-[11px] font-medium border border-indigo-500">
+                        سودمەند (کەم)
+                    </button>
+                    <button onclick="setSpeed(1000, this)" class="speed-btn py-1.5 rounded-lg bg-dark-card text-gray-400 text-[11px] font-medium border border-gray-700 hover:text-white">
+                        ناوەند (٥٠٠/خولەک)
+                    </button>
+                    <button onclick="setSpeed(400, this)" class="speed-btn py-1.5 rounded-lg bg-dark-card text-gray-400 text-[11px] font-medium border border-gray-700 hover:text-white">
+                        خێرا (Super)
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white">ئۆتۆمەیشنی تیکتۆک</h2>
+                    <p class="text-xs text-gray-400 mt-0.5" id="liveStatusText">ئامادەیە بۆ بەستنەوە بە لایڤ</p>
+                </div>
+                <button id="mainToggleBtn" onclick="toggleMainBot()" class="px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs tracking-wider transition shadow-lg shadow-emerald-500/30 active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-play"></i>
+                    <span id="btnText">دەستپێکردنی لایڤ لایکەر</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Stats Grid -->
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Stat 1 -->
+            <div class="glass-panel p-3.5 rounded-2xl relative">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-xs font-medium">کۆی لایکەکان</span>
+                    <div class="w-7 h-7 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <div class="text-xl font-black text-white tracking-tight" id="counter-likes">12,480</div>
+                <div class="flex items-center gap-1 text-[11px] text-emerald-400 mt-1">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>+24.5% لە کاتژمێری ڕابردوو</span>
+                </div>
+            </div>
+
+            <!-- Stat 2 -->
+            <div class="glass-panel p-3.5 rounded-2xl relative">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-xs font-medium">ئەکاونتی چالاک</span>
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <div class="text-xl font-black text-white tracking-tight" id="counter-accounts">15 / 30</div>
+                <div class="flex items-center gap-1 text-[11px] text-emerald-400 mt-1">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="activeAccountPercent">50% ڕێژەی چالاکی</span>
+                </div>
+            </div>
+
+            <!-- Stat 3 -->
+            <div class="glass-panel p-3.5 rounded-2xl relative">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-xs font-medium">خێرایی وەڵامدانەوە</span>
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                </div>
+                <div class="text-xl font-black text-white tracking-tight">45 ms</div>
+                <div class="flex items-center gap-1 text-[11px] text-amber-400 mt-1">
+                    <i class="fa-solid fa-wifi"></i>
+                    <span>پەیوەندی توندوتۆڵە</span>
+                </div>
+            </div>
+
+            <!-- Stat 4 -->
+            <div class="glass-panel p-3.5 rounded-2xl relative">
+                <div class="flex items-center justify-between text-gray-400 mb-2">
+                    <span class="text-xs font-medium">ڕێژەی هەڵەکان</span>
+                    <div class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                </div>
+                <div class="text-xl font-black text-white tracking-tight">0.02%</div>
+                <div class="flex items-center gap-1 text-[11px] text-indigo-400 mt-1">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Anti-Bot چالاکە</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts & Session List Section -->
+        <div class="glass-panel p-4 rounded-3xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-indigo-400"></i>
+                        دیاریکردنی ئەکاونتەکان (کۆی گشتی: ٣٠)
+                    </h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5">بەپێی ویستی خۆت ژمارەی ئەکاونتەکان هەڵبژێرە</p>
+                </div>
+                <span class="text-xs text-indigo-300 font-bold bg-indigo-500/20 px-2.5 py-1 rounded-full border border-indigo-500/30" id="accountCountTag">15 چالاکن</span>
+            </div>
+
+            <!-- Quick Selection Preset Buttons -->
+            <div class="space-y-1.5 pt-1">
+                <div class="text-[11px] font-semibold text-gray-400">هەڵبژاردنی خێرا:</div>
+                <div class="grid grid-cols-6 gap-1">
+                    <button onclick="selectQuickCount(3)" class="py-1 rounded-lg bg-dark-card border border-gray-700 text-xs text-gray-300 hover:border-indigo-500 hover:text-white transition">3</button>
+                    <button onclick="selectQuickCount(5)" class="py-1 rounded-lg bg-dark-card border border-gray-700 text-xs text-gray-300 hover:border-indigo-500 hover:text-white transition">5</button>
+                    <button onclick="selectQuickCount(11)" class="py-1 rounded-lg bg-dark-card border border-gray-700 text-xs text-gray-300 hover:border-indigo-500 hover:text-white transition">11</button>
+                    <button onclick="selectQuickCount(17)" class="py-1 rounded-lg bg-dark-card border border-gray-700 text-xs text-gray-300 hover:border-indigo-500 hover:text-white transition">17</button>
+                    <button onclick="selectQuickCount(23)" class="py-1 rounded-lg bg-dark-card border border-gray-700 text-xs text-gray-300 hover:border-indigo-500 hover:text-white transition">23</button>
+                    <button onclick="selectQuickCount(30)" class="py-1 rounded-lg bg-indigo-600 border border-indigo-500 text-xs text-white font-bold transition">30</button>
+                </div>
+            </div>
+
+            <!-- Select All / Deselect Controls -->
+            <div class="flex items-center justify-between text-xs pt-1 border-t border-gray-800">
+                <button onclick="selectAllAccounts(true)" class="text-indigo-400 hover:underline">هەڵبژاردنی هەمووی (٣٠)</button>
+                <button onclick="selectAllAccounts(false)" class="text-gray-400 hover:underline">سڕینەوەی دیاریکراوەکان</button>
+            </div>
+
+            <!-- Scrollable Accounts List (30 Items support) -->
+            <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="accountsContainer">
+                <!-- Javascript will auto generate 30 account items -->
+            </div>
+        </div>
+
+        <!-- Interactive Chart Section -->
+        <div class="glass-panel p-4 rounded-3xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm text-white">کاریگەری و چالاکی ڕاستەوخۆ</h3>
+                    <p class="text-xs text-gray-400">ناردنی داواکاری لەماوەی ٢٤ کاتژمێردا</p>
+                </div>
+                <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded-lg">شیکاری زینیوو</span>
+            </div>
+            <div class="h-44 w-full">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Connected Accounts List Section -->
+        <div class="glass-panel p-4 rounded-3xl space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-indigo-400"></i>
+                    لیستی ئەکاونتە بەستراوەکان
+                </h3>
+                <span class="text-xs text-gray-400" id="staticAccountCountTag">٢ ئەکاونت</span>
+            </div>
+
+            <div class="space-y-2.5" id="staticAccountsContainer">
+                <!-- Account Item 1 -->
+                <div class="flex items-center justify-between p-2.5 rounded-2xl bg-dark-card/60 border border-gray-800/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold">
+                            T1
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white">rekar_dev@gmail.com</div>
+                            <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Session Saved
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="removeStaticAccount(this)" class="text-gray-500 hover:text-rose-400 p-2 text-xs transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+                <!-- Account Item 2 -->
+                <div class="flex items-center justify-between p-2.5 rounded-2xl bg-dark-card/60 border border-gray-800/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
+                            T2
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white">tiktok_promo_01@gmail.com</div>
+                            <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Session Saved
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="removeStaticAccount(this)" class="text-gray-500 hover:text-rose-400 p-2 text-xs transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Activity Log Window -->
+        <div class="glass-panel p-4 rounded-3xl space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-emerald-400"></i>
+                    تۆماری چالاکییەکان (Live Logs)
+                </h3>
+                <button onclick="clearLogs()" class="text-[11px] text-gray-400 hover:text-white transition">سڕینەوە</button>
+            </div>
+
+            <div id="logsContainer" class="h-36 overflow-y-auto font-mono text-[11px] space-y-1.5 p-3 rounded-2xl bg-black/40 border border-gray-800/60 text-gray-300">
+                <div class="text-gray-500">[10:42:01] سیستەم بە سەرکەوتوویی دەستی پێکرد.</div>
+                <div class="text-indigo-400">[10:42:05] لۆدکردنی سێشنەکان لە فۆڵدەری /sessions...</div>
+                <div class="text-emerald-400">[10:42:10] پەیوەندی سەلامەت دامەزرا لەگەڵ لایڤ!</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- iOS Glass Mobile Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-gray-800/80 px-6 py-2.5">
+        <div class="flex items-center justify-between max-w-md mx-auto text-gray-400">
+            <button class="flex flex-col items-center gap-1 text-indigo-400 transition">
+                <i class="fa-solid fa-house-chimney text-lg"></i>
+                <span class="text-[10px] font-medium">سەرەکی</span>
+            </button>
+            <button onclick="showToast('تایبەتمەندی ڕێکخستن بەزووانە لەسەر کۆمپیوتەر چالاک دەبێت')" class="flex flex-col items-center gap-1 hover:text-gray-200 transition">
+                <i class="fa-solid fa-sliders text-lg"></i>
+                <span class="text-[10px] font-medium">کۆنتڕۆڵ</span>
+            </button>
+            <button onclick="showToast('سیستەمی پروکسی چالاکە')" class="flex flex-col items-center gap-1 hover:text-gray-200 transition">
+                <i class="fa-solid fa-network-wired text-lg"></i>
+                <span class="text-[10px] font-medium">پڕۆکسی</span>
+            </button>
+            <button onclick="toggleModal('accountModal')" class="flex flex-col items-center gap-1 hover:text-gray-200 transition">
+                <i class="fa-solid fa-user-gear text-lg"></i>
+                <span class="text-[10px] font-medium">ئەکاونتەکان</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal Form for Adding Account -->
+    <div id="accountModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-5 space-y-4 border border-gray-700/60 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-base text-white">زیادکردنی ئەکاونتی نوێ</h3>
+                <button onclick="toggleModal('accountModal')" class="w-8 h-8 rounded-full glass-button flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="addAccountForm" onsubmit="handleAddAccount(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">ئیمەیل یان ناوی بەکارهێنەر</label>
+                    <input type="text" id="accEmail" required placeholder="example@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl bg-dark-bg/80 border border-gray-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">پاسۆرد</label>
+                    <input type="password" id="accPassword" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-dark-bg/80 border border-gray-700 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
+                </div>
+
+                <div class="pt-2 flex items-center gap-2">
+                    <button type="button" onclick="toggleModal('accountModal')" class="w-1/2 py-2.5 rounded-xl glass-button text-xs font-bold text-gray-300">پاشگەزبوونەوە</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow-lg shadow-indigo-600/30">زیادکردن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Element -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 glass-panel px-4 py-2.5 rounded-2xl border border-indigo-500/30 shadow-xl flex items-center gap-2.5 text-xs text-white opacity-0 pointer-events-none transition-all duration-300">
+        <i class="fa-solid fa-circle-info text-indigo-400" id="toastIcon"></i>
+        <span id="toastMessage">پەیامی سیستم</span>
+    </div>
+
+    <!-- JavaScript Logic (Fully Fixed & Interactive) -->
+    <script>
+        // System Global State Variables
+        let isRunning = false;
+        let likesCount = 12480;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let speedIntervalMs = 2000;
+        let botInterval = null;
+        let chartInstance = null;
+
+        // Initialize 30 accounts & Chart on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDefaultAccounts(30);
+            selectQuickCount(15);
+            initChart();
+        });
+
+        // 1. Chart.js Initialization
+        function initChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'ئێستا'],
+                    datasets: [{
+                        label: 'کارلێکەکان',
+                        data: [1200, 2400, 4100, 7800, 9500, 11200, likesCount],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // 2. Main Toggle Bot Controller
+        function toggleMainBot() {
+            const liveUrl = document.getElementById('liveUrlInput').value.trim();
+            const activeCheckboxes = document.querySelectorAll('.acc-checkbox:checked');
+
+            if (!isRunning) {
+                if (!liveUrl) {
+                    showToast('تکایە سەرەتا لینکی لایڤی تیکتۆک بنووسە!');
+                    return;
+                }
+                if (activeCheckboxes.length === 0) {
+                    showToast('تکایە لانیکەم ئەکاونتێک دیاری بکە!');
+                    return;
+                }
+
+                isRunning = true;
+                updateBotUI(true);
+                startTimer();
+                startBotEngine();
+                addLog(`بەستنەوە بۆ لایڤ ئەنجامدرا: ${liveUrl}`, 'emerald');
+                showToast('سیستەمی لایککردن بە سەرکەوتوویی دەستی پێکرد');
+            } else {
+                isRunning = false;
+                updateBotUI(false);
+                stopTimer();
+                clearInterval(botInterval);
+                addLog('سیستەم لەلایەن بەکارهێنەرەوە وەستێنرا.', 'rose');
+                showToast('ئۆتۆمەیشن وەستێنرا');
+            }
+        }
+
+        function updateBotUI(active) {
+            const btn = document.getElementById('mainToggleBtn');
+            const btnText = document.getElementById('btnText');
+            const statusText = document.getElementById('liveStatusText');
+            const sysStatus = document.getElementById('system-status');
+
+            if (active) {
+                btn.className = "px-5 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs tracking-wider transition shadow-lg shadow-rose-500/30 active:scale-95 flex items-center gap-2";
+                btn.querySelector('i').className = "fa-solid fa-square";
+                btnText.innerText = "ڕاگرتنی بۆت";
+                statusText.innerText = "لایڤ چالاکە و لایک دەنێردرێت...";
+                statusText.classList.add('text-emerald-400');
+                sysStatus.innerText = "بۆت سەرقاڵی لایککردنە";
+            } else {
+                btn.className = "px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs tracking-wider transition shadow-lg shadow-emerald-500/30 active:scale-95 flex items-center gap-2";
+                btn.querySelector('i').className = "fa-solid fa-play";
+                btnText.innerText = "دەستپێکردنی لایڤ لایکەر";
+                statusText.innerText = "ئامادەیە بۆ بەستنەوە بە لایڤ";
+                statusText.classList.remove('text-emerald-400');
+                sysStatus.innerText = "سیستم کارایە";
+            }
+        }
+
+        // 3. Speed Rate Handler
+        function setSpeed(ms, btnElement) {
+            speedIntervalMs = ms;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.className = "speed-btn py-1.5 rounded-lg bg-dark-card text-gray-400 text-[11px] font-medium border border-gray-700 hover:text-white";
+            });
+            btnElement.className = "speed-btn active py-1.5 rounded-lg bg-indigo-600 text-white text-[11px] font-medium border border-indigo-500";
+
+            if (isRunning) {
+                clearInterval(botInterval);
+                startBotEngine();
+            }
+            addLog(`خێرایی ناردن گۆڕدرا بۆ: ${ms}ms`, 'indigo');
+        }
+
+        // 4. Live URL Paste Functionality
+        function pasteLiveUrl() {
+            document.getElementById('liveUrlInput').value = "https://www.tiktok.com/@user/live";
+            showToast('لینکی نموونەیی پەیست کرا');
+        }
+
+        // 5. Bot Engine & Increment Logic
+        function startBotEngine() {
+            botInterval = setInterval(() => {
+                const activeCheckboxes = Array.from(document.querySelectorAll('.acc-checkbox:checked'));
+                if (activeCheckboxes.length === 0) return;
+
+                const increment = Math.floor(Math.random() * 14) + 3;
+                likesCount += increment;
+                document.getElementById('counter-likes').innerText = likesCount.toLocaleString();
+
+                if (chartInstance) {
+                    chartInstance.data.datasets[0].data[6] = likesCount;
+                    chartInstance.update();
+                }
+
+                if (Math.random() > 0.4) {
+                    const randomAcc = activeCheckboxes[Math.floor(Math.random() * activeCheckboxes.length)];
+                    const accName = randomAcc.closest('.flex').querySelector('.text-white').innerText;
+                    addLog(`[${accName}] +${increment} لایکی نارد`, 'indigo');
+                }
+            }, speedIntervalMs);
+        }
+
+        // 6. Accounts Setup
+        function renderDefaultAccounts(count) {
+            const container = document.getElementById('accountsContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= count; i++) {
+                const email = `account_${i}@tiktok.com`;
+                const newItem = document.createElement('div');
+                newItem.className = "flex items-center justify-between p-2.5 rounded-2xl bg-dark-card/60 border border-gray-800/80 transition hover:border-gray-700";
+                newItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" onchange="updateAccountStats()" class="acc-checkbox w-4 h-4 rounded border-gray-700 bg-dark-bg text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-[11px] font-bold">
+                            #${i}
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white">${email}</div>
+                            <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Session Ready
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="removeAccount(this)" class="text-gray-500 hover:text-rose-400 p-1.5 text-xs transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                container.appendChild(newItem);
+            }
+            updateAccountStats();
+        }
+
+        function selectQuickCount(n) {
+            const checkboxes = document.querySelectorAll('.acc-checkbox');
+            checkboxes.forEach((cb, index) => cb.checked = index < n);
+            updateAccountStats();
+            showToast(`دیاریکرا: ${n} ئەکاونت چالاکن`);
+        }
+
+        function selectAllAccounts(status) {
+            const checkboxes = document.querySelectorAll('.acc-checkbox');
+            checkboxes.forEach(cb => cb.checked = status);
+            updateAccountStats();
+        }
+
+        function updateAccountStats() {
+            const checkboxes = document.querySelectorAll('.acc-checkbox');
+            const total = checkboxes.length;
+            const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+            document.getElementById('counter-accounts').innerText = `${checked} / ${total}`;
+            document.getElementById('accountCountTag').innerText = `${checked} چالاکن`;
+            
+            const percent = total > 0 ? Math.round((checked / total) * 100) : 0;
+            document.getElementById('activeAccountPercent').innerText = `${percent}% ڕێژەی چالاکی`;
+        }
+
+        // 7. Timer & Logging Helpers
+        function startTimer() {
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('live-timer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function addLog(message, color = 'gray') {
+            const container = document.getElementById('logsContainer');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            
+            let colorClass = 'text-gray-300';
+            if (color === 'emerald') colorClass = 'text-emerald-400';
+            if (color === 'indigo') colorClass = 'text-indigo-400';
+            if (color === 'rose') colorClass = 'text-rose-400';
+
+            const logItem = document.createElement('div');
+            logItem.className = `${colorClass} transition-all duration-200`;
+            logItem.innerHTML = `<span class="text-gray-500">[${time}]</span> ${message}`;
+            
+            container.appendChild(logItem);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logsContainer').innerHTML = '<div class="text-gray-500">[سیستم] تۆمارەکان سڕانەوە.</div>';
+        }
+
+        // 8. Account Form & Modal UI
+        function handleAddAccount(e) {
+            e.preventDefault();
+            const email = document.getElementById('accEmail').value;
+            if (!email) return;
+
+            const container = document.getElementById('accountsContainer');
+            const accIndex = container.children.length + 1;
+
+            const newItem = document.createElement('div');
+            newItem.className = "flex items-center justify-between p-2.5 rounded-2xl bg-dark-card/60 border border-gray-800/80 transition hover:border-gray-700";
+            newItem.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" checked onchange="updateAccountStats()" class="acc-checkbox w-4 h-4 rounded border-gray-700 bg-dark-bg text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white text-[11px] font-bold">
+                        #${accIndex}
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-white">${email}</div>
+                        <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Session Ready
+                        </div>
+                    </div>
+                </div>
+                <button onclick="removeAccount(this)" class="text-gray-500 hover:text-rose-400 p-1.5 text-xs transition">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+
+            container.appendChild(newItem);
+            document.getElementById('addAccountForm').reset();
+            toggleModal('accountModal');
+            updateAccountStats();
+            addLog(`ئەکاونتی نوێ زیادکرا: ${email}`, 'emerald');
+            showToast('ئەکاونتەکەت سەرکەوتووانە زیادکرا');
+        }
+
+        function removeAccount(btn) {
+            const row = btn.closest('.flex');
+            row.remove();
+            updateAccountStats();
+            addLog('ئەکاونتێک سڕایەوە', 'rose');
+            showToast('ئەکاونتەکە سڕایەوە');
+        }
+
+        function removeStaticAccount(btn) {
+            const row = btn.closest('.flex');
+            row.remove();
+            const container = document.getElementById('staticAccountsContainer');
+            const countTag = document.getElementById('staticAccountCountTag');
+            if (countTag) countTag.innerText = `${container.children.length} ئەکاونت`;
+            addLog('ئەکاونتێک سڕایەوە', 'rose');
+            showToast('ئەکاونتەکە سڕایەوە');
+        }
+
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function triggerNotification() {
+            showToast('هیچ ئاگادارکردنەوەیەکی نوێ نییە لەسەر سیستم');
+        }
+    </script>
+</body>
+</html>
